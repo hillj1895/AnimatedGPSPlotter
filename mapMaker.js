@@ -1,5 +1,24 @@
 var viewer = new Cesium.Viewer('cesiumDiv')
 
+var data;
+
+function handleFile(evt) {
+  var file = evt.target.files[0];
+  //console.log(evt.target.files);
+  Papa.parse(file, {
+    header: true,
+    dynamicTyping: true,
+    complete: function(results) {
+      data = results;
+      console.log(results);
+    }
+  });
+}
+
+$(document).ready(function() {
+  $("#csv-file").change(handleFile);
+});
+
 var citizensBankPark = viewer.entities.add({
 	position : Cesium.Cartesian3.fromDegrees(-73.6440, 43.3095),
 	point : {
