@@ -1,4 +1,6 @@
 var viewer = new Cesium.Viewer('cesiumDiv')
+var timeline = viewer.timeline;
+var clock = viewer.clock;
 
 var data;
 
@@ -11,7 +13,7 @@ function handleFile(evt) {
     complete: function(results) {
       data = results.data;
       console.log(results);
-      setInterval();
+      setTimelineInterval();
       var myDate = new Date(data[0].sense_time);
 
       console.log(myDate.getTime());
@@ -19,22 +21,37 @@ function handleFile(evt) {
   });
 }
 
+// Jquery to run the parser 
+$(document).ready(function() {
+  $("#csv-file").change(handleFile);
+});
+
+// Sets the timeline interval and the current time on the clock to the first time in the CSV file
+function setTimelineInterval()
+{
+  var firstTime = new Date(data[0].sense_time);
+  var firstTimeCesium = Cesium.JulianDate.fromDate(firstTime);
+  //console.log(firstTime);
+  var lastTime = new Date(data[data.length - 1].sense_time);
+  var lastTimeCesium = Cesium.JulianDate.fromDate(lastTime);
+  timeline.zoomTo(firstTimeCesium, lastTimeCesium);
+  clock.startTime = firstTimeCesium;
+  clock.stopTime = lastTimeCesium;
+  clock.currentTime = firstTimeCesium;
+  clock.clockRange = Cesium.ClockRange.LOOP_STOP;
+  timeline.updateFromClock();
+}
+
+    //var metaLatitude = document.getElementById("metaLatitude");
+    //var metaLongitude = document.getElementById("metaLongitude");
+
+    //metaLatitude.innerHTML += " " + citizensBankPark.position.getValue().y;
+    //metaLongitude.innerHTML += " " + citizensBankPark.position.getValue().x;
+
 function dataCallback() {
 	// To be called each tick to check whether new point should be displayed
 	console.log('hello');
 }
-
-// var times = Cesium.TimeIntervalCollection.fromIso8601({
-//     iso8601: '2015-07-30/2017-06-16/P1D',
-//     leadingInterval: true,
-//     trailingInterval: true,
-//     isStopIncluded: false, // We want stop time to be part of the trailing interval
-//     dataCallback: dataCallback
-// });
-
-$(document).ready(function() {
-  $("#csv-file").change(handleFile);
-});
 
 // Sample point to fly to
 var citizensBankPark = viewer.entities.add({
@@ -50,16 +67,6 @@ var citizensBankPark = viewer.entities.add({
 viewer.flyTo(viewer.entities);
 
 
-
-var clock = new Cesium.Clock({
-	startTime : Cesium.JulianDate.fromIso8601("2013-12-25"),
-	currentTime : Cesium.JulianDate.fromIso8601("2013-12-25"),
-	stopTime : Cesium.JulianDate.fromIso8601("2013-12-26"),
-	clockRange : Cesium.ClockRange.LOOP_STOP,
-	clockStep : Cesium.ClockStep.SYSTEM_CLOCK_MULTIPLIER,
-	shouldAnimate : true,
-	canAnimate: true
-
-});
+// });
 
 
